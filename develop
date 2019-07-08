@@ -11,108 +11,123 @@ export MYSQL_PASSWORD=${MYSQL_PASSWORD:-secret}
 COMPOSE_FILE="dev"
 TTY=""
 
-if [ ! -z "$BUILD_NUMBER" ]; then
+if [ ! -z "${BUILD_NUMBER}" ]
+then
     COMPOSE_FILE="ci"
     TTY="-T"
 fi
 
-COMPOSE="docker-compose -f docker-compose.$COMPOSE_FILE.yml"
-PSRESULT=$($COMPOSE ps -q)
+COMPOSE="docker-compose -f docker-compose.${COMPOSE_FILE}.yml"
+PSRESULT=`${COMPOSE} ps -q`
 
-if [ ! -z "$PSRESULT" ]; then
+if [ ! -z "${PSRESULT}" ]
+then
     EXEC="yes"
 else
     EXEC="no"
 fi
 
 # If we pass any arguments...
-if [ $# -gt 0 ]; then
+if [ ${#} -gt 0 ]
+then
 
-    if [ -f .env ]; then
+    if [ -f .env ]
+    then
         source .env
     fi
 
-    if [ "$1" == "start" ]; then
-        $COMPOSE up -d
-    elif [ "$1" == "stop" ]; then
-        $COMPOSE down
+    if [ "${1}" == "start" ]
+    then
+        ${COMPOSE} up -d
+    elif [ "${1}" == "stop" ]
+        then
+        ${COMPOSE} down
 
     # If "art" is used, pass-thru to "artisan"
     # inside a new container
-    elif [ "$1" == "artisan" ] || [ "$1" == "art" ]; then
+    elif [ "${1}" == "artisan" ] || [ "${1}" == "art" ]
+        then
         shift 1
-        if [ "$EXEC" == "yes" ]; then
-            $COMPOSE exec $TTY \
+        if [ "${EXEC}" == "yes" ]
+        then
+            ${COMPOSE} exec ${TTY} \
                 app \
-                php artisan "$@"
+                php artisan "${@}"
         else
-            $COMPOSE run --rm $TTY \
+            ${COMPOSE} run --rm ${TTY} \
                 -w /var/www/html \
                 app \
-                php artisan "$@"
+                php artisan "${@}"
         fi
 
     # If "composer" is used, pass-thru to "composer"
     # inside a new container
-    elif [ "$1" == "composer" ] || [ "$1" == "comp" ]; then
+    elif [ "${1}" == "composer" ] || [ "${1}" == "comp" ]
+        then
         shift 1
-        if [ "$EXEC" == "yes" ]; then
-            $COMPOSE exec $TTY \
+        if [ "${EXEC}" == "yes" ]
+        then
+            ${COMPOSE} exec ${TTY} \
                 app \
-                composer "$@"
+                composer "${@}"
         else
-            $COMPOSE run --rm $TTY \
+            ${COMPOSE} run --rm ${TTY} \
                 -w /var/www/html \
                 app \
-                composer "$@"
+                composer "${@}"
         fi
 
     # If "test" is used, run unit tests,
     # pass-thru any extra arguments to php-unit
-    elif [ "$1" == "test" ] || [ "$1" == "t" ]; then
+    elif [ "${1}" == "test" ] || [ "${1}" == "t" ]
+        then
         shift 1
-        if [ "$EXEC" == "yes" ]; then
-            $COMPOSE exec $TTY \
+        if [ "${EXEC}" == "yes" ]
+        then
+            ${COMPOSE} exec ${TTY} \
                 app \
-                ./vendor/bin/phpunit "$@"
+                ./vendor/bin/phpunit "${@}"
         else
-            $COMPOSE run --rm $TTY \
+            ${COMPOSE} run --rm ${TTY} \
                 -w /var/www/html \
                 app \
-                ./vendor/bin/phpunit "$@"
+                ./vendor/bin/phpunit "${@}"
         fi
 
     # If "npm" is used, run npm
     # from our node container
-    elif [ "$1" == "npm" ]; then
+    elif [ "${1}" == "npm" ]
+        then
         shift 1
-        $COMPOSE run --rm $TTY \
+        ${COMPOSE} run --rm ${TTY} \
             -w /var/www/html \
             node \
-            npm "$@"
+            npm "${@}"
 
     # If "gulp" is used, run gulp
     # from our node container
-    elif [ "$1" == "gulp" ]; then
+    elif [ "${1}" == "gulp" ]
+        then
         shift 1
-        $COMPOSE run --rm $TTY \
+        ${COMPOSE} run --rm ${TTY} \
             -w /var/www/html \
             node \
-            ./node_modules/.bin/gulp "$@"
+            ./node_modules/.bin/gulp "${@}"
 
     # If "yarn" is used, run yarn
     # from our node container
-    elif [ "$1" == "yarn" ]; then
+    elif [ "${1}" == "yarn" ]
+        then
         shift 1
-        $COMPOSE run --rm $TTY \
+        ${COMPOSE} run --rm ${TTY} \
             -w /var/www/html \
             node \
-            yarn "$@"
+            yarn "${@}"
 
     # Else, pass-thru args to docker-compose
     else
-        $COMPOSE "$@"
+        ${COMPOSE} "${@}"
     fi
 else
-    $COMPOSE ps
+    ${COMPOSE} ps
 fi
