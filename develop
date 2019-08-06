@@ -11,16 +11,16 @@ export MYSQL_PASSWORD=${MYSQL_PASSWORD:-secret}
 COMPOSE_FILE="dev"
 TTY=""
 
-if [ ! -z "${BUILD_NUMBER}" ]
+if [[ -n "${BUILD_NUMBER}" ]]
 then
     COMPOSE_FILE="ci"
     TTY="-T"
 fi
 
 COMPOSE="docker-compose -f docker-compose.${COMPOSE_FILE}.yml"
-PSRESULT=`${COMPOSE} ps -q`
+PS_RESULT=$(${COMPOSE} ps -q)
 
-if [ ! -z "${PSRESULT}" ]
+if [[ -n "${PS_RESULT}" ]]
 then
     EXEC="yes"
 else
@@ -28,27 +28,27 @@ else
 fi
 
 # If we pass any arguments...
-if [ ${#} -gt 0 ]
+if [[ ${#} -gt 0 ]]
 then
 
-    if [ -f .env ]
+    if [[ -f .env ]]
     then
         source .env
     fi
 
-    if [ "${1}" == "start" ]
+    if [[ "${1}" == "start" ]]
     then
         ${COMPOSE} up -d
-    elif [ "${1}" == "stop" ]
+    elif [[ "${1}" == "stop" ]]
         then
         ${COMPOSE} down
 
     # If "art" is used, pass-thru to "artisan"
     # inside a new container
-    elif [ "${1}" == "artisan" ] || [ "${1}" == "art" ]
+    elif [[ "${1}" == "artisan" ]] || [[ "${1}" == "art" ]]
         then
         shift 1
-        if [ "${EXEC}" == "yes" ]
+        if [[ "${EXEC}" == "yes" ]]
         then
             ${COMPOSE} exec ${TTY} \
                 app \
@@ -62,10 +62,10 @@ then
 
     # If "composer" is used, pass-thru to "composer"
     # inside a new container
-    elif [ "${1}" == "composer" ] || [ "${1}" == "comp" ]
+    elif [[ "${1}" == "composer" ]] || [[ "${1}" == "comp" ]]
         then
         shift 1
-        if [ "${EXEC}" == "yes" ]
+        if [[ "${EXEC}" == "yes" ]]
         then
             ${COMPOSE} exec ${TTY} \
                 app \
@@ -79,10 +79,10 @@ then
 
     # If "test" is used, run unit tests,
     # pass-thru any extra arguments to php-unit
-    elif [ "${1}" == "test" ] || [ "${1}" == "t" ]
+    elif [[ "${1}" == "test" ]] || [[ "${1}" == "t" ]]
         then
         shift 1
-        if [ "${EXEC}" == "yes" ]
+        if [[ "${EXEC}" == "yes" ]]
         then
             ${COMPOSE} exec ${TTY} \
                 app \
@@ -96,7 +96,7 @@ then
 
     # If "npm" is used, run npm
     # from our node container
-    elif [ "${1}" == "npm" ]
+    elif [[ "${1}" == "npm" ]]
         then
         shift 1
         ${COMPOSE} run --rm ${TTY} \
@@ -106,7 +106,7 @@ then
 
     # If "gulp" is used, run gulp
     # from our node container
-    elif [ "${1}" == "gulp" ]
+    elif [[ "${1}" == "gulp" ]]
         then
         shift 1
         ${COMPOSE} run --rm ${TTY} \
@@ -116,7 +116,7 @@ then
 
     # If "yarn" is used, run yarn
     # from our node container
-    elif [ "${1}" == "yarn" ]
+    elif [[ "${1}" == "yarn" ]]
         then
         shift 1
         ${COMPOSE} run --rm ${TTY} \
