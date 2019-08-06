@@ -4,6 +4,7 @@ services:
     build:
       context: ./docker/app
       dockerfile: Dockerfile
+    container_name: app
     image: stydedocker/app
     volumes:
       - .:/var/www/html
@@ -13,12 +14,14 @@ services:
       - stydenet
   node:
     image: node:9.8
+    container_name: nodejs
     volumes:
       - .:/var/www/html
     networks:
       - stydenet
   mysql:
     image: mysql:5.7
+    container_name: mysql
     ports:
       - "${MYSQL_PORT}:3306"
     environment:
@@ -32,6 +35,7 @@ services:
       - stydenet
   redis:
     image: redis:alpine
+    container_name: redis
     volumes:
       - redisdata:/data
     networks:
